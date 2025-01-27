@@ -1,0 +1,14 @@
+/Users/shaheennafeie/Desktop/wsuMenu/bin/Debug/net9.0/wsuMenu
+/Users/shaheennafeie/Desktop/wsuMenu/bin/Debug/net9.0/wsuMenu.deps.json
+/Users/shaheennafeie/Desktop/wsuMenu/bin/Debug/net9.0/wsuMenu.runtimeconfig.json
+/Users/shaheennafeie/Desktop/wsuMenu/bin/Debug/net9.0/wsuMenu.dll
+/Users/shaheennafeie/Desktop/wsuMenu/bin/Debug/net9.0/wsuMenu.pdb
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.GeneratedMSBuildEditorConfig.editorconfig
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.AssemblyInfoInputs.cache
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.AssemblyInfo.cs
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.csproj.CoreCompileInputs.cache
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.dll
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/refint/wsuMenu.dll
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.pdb
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/wsuMenu.genruntimeconfig.cache
+/Users/shaheennafeie/Desktop/wsuMenu/obj/Debug/net9.0/ref/wsuMenu.dll
