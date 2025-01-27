@@ -13,4 +13,32 @@ static void Main(){
 
     while (cougMenu){
         Console.WriteLine("COUGARS DOMAIN");
-        Console.WriteLine("1
+        Console.WriteLine("1. START");
+        Console.WriteLine("2. OPTIONS");
+
+        string pick = Console.ReadLine();
+
+        switch (pick){
+            case "1":
+            Console.WriteLine("Starting!");
+            break;
+
+            case "2":
+            Console.WriteLine("Options");
+            break;
+        }
+    
+
+
+
+        
+    }
+
+
+    
+}
+}
+
+
+
+
