@@ -10,3 +10,4 @@ CougarsDomain is a project designed to allow students to create and customize th
 - Enhanced graphics and animations for a more immersive experience.
 - Online leaderboards to track high scores and compete with friends.
 
+This is a new version made by Jason that came with initial default packages from Unity's Universal 3D (URP) template. 
