@@ -9,3 +9,9 @@ UserSettings/
 Packages/
 ProjectSettings/
 obj/
+# Ignore Unity's Library and Temp folders
+Library/
+Temp/
+Logs/
+Packages/
+
