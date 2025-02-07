@@ -2,3 +2,10 @@ CougarsDomain/Library/
 CougarsDomain/Library/PackageCache/
 CougarsDomain/Library/
 CougarsDomain/Library/PackageCache/
+Library/
+Logs/
+Temp/
+UserSettings/
+Packages/
+ProjectSettings/
+obj/
