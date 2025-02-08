@@ -1,0 +1,17 @@
+CougarsDomain/Library/
+CougarsDomain/Library/PackageCache/
+CougarsDomain/Library/
+CougarsDomain/Library/PackageCache/
+Library/
+Logs/
+Temp/
+UserSettings/
+Packages/
+ProjectSettings/
+obj/
+# Ignore Unity's Library and Temp folders
+Library/
+Temp/
+Logs/
+Packages/
+
