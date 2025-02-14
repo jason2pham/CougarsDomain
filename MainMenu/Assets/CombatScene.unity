@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be9ee09fab43c43188ea915fe0646c6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackButton: {fileID: 0}
+  attackButton: {fileID: 1644180533}
   targetEnemy: {fileID: 1885086201}
   attackDamage: 10
 --- !u!54 &218238015
