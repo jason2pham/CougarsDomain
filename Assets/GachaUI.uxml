@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="container">
+        <ui:Label text="Gacha System" class="title" />
+        <ui:Button name="SummonButton" text="Summon" class="summon-button" />
+        <ui:Label name="ResultText" text="Result will appear here" class="result-text" />
+        <ui:ListView name="SummonedItemsList" class="summoned-list" />
+    </ui:VisualElement>
+</ui:UXML>\
+
