@@ -15,10 +15,10 @@ culminating in a final boss who is inspired by one of the WSU Vancouver CS profe
 using UnityEngine;
 // Featue MonoBehavior
 // Used MonoBehaviour to allow script to interact with Unity's built-in systemts 
-public class MusicSound : MonoBehaviour // base class, allows you to attach scripts to GameObjects in unity (OOP)
+public class MusicSound : MonoBehaviour // base class, allows you to attach scripts to GameObjects in unity 
 {
 
-   // Declaring variables (DS primitive types)
+   // Declaring variables 
    // Public variables used to change values easily 
    // Private variables used to keep class focused on its specific tasks 
     public AudioClip movementSound; // Sound for movement 
