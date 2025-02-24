@@ -45,8 +45,8 @@ public class MusicSound : MonoBehaviour // base class, allows you to attach scri
     {
         
         // Player input, capture input with arrow keys 
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        float horizontal = Input.GetAxis("Horizontal"); //GetAxis used to get player input for movement, returns float value between left (-1) and right (1)
+        float vertical = Input.GetAxis("Vertical"); // Returns float between down (-1) and up (1)
         
         // Create movement vector based on input, makes object move
         Vector3 movement = new Vector3(horizontal, 0, vertical) * moveSpeed; // Struct used (Vector3)
