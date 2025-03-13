@@ -189,6 +189,18 @@ public class Program
         var bowStats = new Dictionary<string, int> { { "Strength", 8 } };
         Weapon bow = new Weapon("Wind Bow", "Rare", bowStats, 20, "Wind");
 
+        var staffStats = new Dictionary<string, int> { { "Strength", 8 } };
+        Weapon staff = new Weapon("Wind Staff", "Rare", bowStats, 20, "Wind");
+
+        var knivesStats = new Dictionary<string, int> { { "Strength", 5 } };
+        Weapon knives = new Weapon("Knives", "Common", kniveStats, 20, "Normal");
+
+        var gunStats = new Dictionary<string, int> { { "Strength", 20 } };
+        Weapon gun = new Weapon("Gun", "Rare", gunStats, 20, "Bullet");
+
+        var machineGunStats = new Dictionary<string, int> { { "Strength", 40 } };
+        Weapon machineGun = new Weapon("Machine Gun", "Legendary", machineGunStats, 40, "Bullet");
+
         // Creating a character
         Character hero = new Character(100, 10, 25);
         hero.AddSkill("Fireball");
