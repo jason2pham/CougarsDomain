@@ -1,0 +1,81 @@
+using UnityEngine;
+
+public class EnemyMovement : MonoBehaviour
+{
+    [Header("Patrol Settings")]
+    public Transform pointA; // First patrol point
+    public Transform pointB; // Second patrol point
+    private Vector3 patrolTarget;
+
+    [Header("Player Settings")]
+    public Transform player; // Reference to the player object
+    private PlayerHealth playerHealth;
+
+    [Header("Distances")]
+    public float chaseRange = 5f; // Distance to start chasing
+    public float attackRange = 1.5f; // Distance to start attacking
+
+    [Header("Enemy Behavior")]
+    public float speed = 3f; // Movement speed
+    public float damage = 10f; // Damage per attack
+    public float attackCooldown = 2f; // Delay between attacks
+
+    private float lastAttackTime = 0f;
+
+    void Start()
+    {
+        patrolTarget = pointA.position; // Begin patrolling to point A
+        playerHealth = player.GetComponent<PlayerHealth>(); // Access PlayerHealth script
+    }
+
+    void Update()
+    {
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (distanceToPlayer <= attackRange)
+        {
+            AttackPlayer(); // Stop moving and attack
+        }
+        else if (distanceToPlayer <= chaseRange)
+        {
+            ChasePlayer(); // Follow the player
+        }
+        else
+        {
+            Patrol(); // Default to patrolling
+        }
+    }
+
+    void Patrol()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, patrolTarget, speed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, patrolTarget) < 0.2f)
+        {
+            patrolTarget = (patrolTarget == pointA.position) ? pointB.position : pointA.position;
+        }
+    }
+
+    void ChasePlayer()
+    {
+        Vector3 direction = (player.position - transform.position).normalized;
+        transform.position += direction * speed * Time.deltaTime;
+    }
+
+    void AttackPlayer()
+    {
+        // Stop all movement if Rigidbody exists
+        if (TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            rb.velocity = Vector3.zero;
+        }
+
+        // Only attack if cooldown has passed
+        if (Time.time - lastAttackTime >= attackCooldown)
+        {
+            Debug.Log("Enemy attacks the player!");
+            playerHealth.TakeDamage(damage);
+            lastAttackTime = Time.time;
+        }
+    }
+}
