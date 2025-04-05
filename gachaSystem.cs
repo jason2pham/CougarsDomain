@@ -21,7 +21,17 @@ public class SummonPool
             dropRate[item.Rarity] = 0f;
         }
     }
-
+    public void setRarityWeight(string rarity, float weight)
+    {
+        if (rarityWeights.Contains(rarity)) 
+        {
+            rarityWeights[rarity] = weight;
+        }
+        else 
+        {
+            Console.Writeline("Rarity not found in summoning pool.");
+        }
+    }
     // Method to pull from the summon pool
     public void Pull()
     {
@@ -211,6 +221,11 @@ public class Program
         SummonPool pool = new SummonPool();
         pool.AddSummonableItem(sword);
         pool.AddSummonableItem(bow);
+
+        // summoning rarity chances 
+        pool.setRarityWeight("Common", 50f);
+        pool.setRarityWeight("Rare", 30f);
+        pool.setRarityWeight("Epic", 15f); 
 
         // Pull a reward from the summon pool
         pool.Pull();
