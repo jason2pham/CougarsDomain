@@ -44,14 +44,24 @@ public class MusicSound : MonoBehaviour // The base class of unity, allowing the
 
     void Awake()
     {
-        DontDestroyOnLoad(this); // Ensures object presists across scene reloads, music and sounds will continue to play
+        // Makes sure GO isn't destroyed when loading a new scene
+        // Makes it so music & sounds continue across scenes
+        DontDestroyOnLoad(this); 
         
-        // Get referneces to components 
+        // Get the AudioSource component attached to this GO
+        // Used to play all sound effects
         audioSource = GetComponent<AudioSource>();
+        
+        // Get Rigidbody component attached to this GO
+        // Control player's physics-based momement
         rb = GetComponent<Rigidbody>();
+
+        // Store current position of the player as the last know position
+        // Used later to detect if player has moved for playing movement sounds
         lastPosition = transform.position;
 
-        // Store enemy's starting position
+        // Check if the enemy cube GO is assigned in the Inspector on unity
+        // If it is, save its starting position so we can respawn this GO if it falls off
         if (enemyCube != null)
         {
             enemyPosition = enemyCube.transform.position;
@@ -60,151 +70,257 @@ public class MusicSound : MonoBehaviour // The base class of unity, allowing the
 
     void Update()
     {
-        if (isGameOver) return; // Skip this if game is over (An object falls down)
+        // If game is over, skipp all logic below and do nothing in this frame
+        // This will prevent player control or sound effects from triggering once game is over
+        if (isGameOver) return; 
 
-        HandleMovement(); // Manage movement and will play movement sound
-        HandleJumping(); // Manage jumping and will play the jump sounds 
-        HandleFalling(); // Detect player falling
-        HandleComboTimer(); // Update combo logic
-        CheckEnemyFalling(); // Check and handle enemy falling
+        // Check for player input and move the player object (Input from arrow keys)
+        // Also plays movement sound when appropriate 
+        HandleMovement(); 
+        
+        // Checks if player is pressing jump key and apply jumping logic
+        // Will handle double-jump limit and will play jump sounds
+        HandleJumping(); 
+        
+        // Checks if player has fallen below the threshold
+        // If so, trigger falling and game over sounds and logic
+        HandleFalling(); 
+        
+         // Updates the timer that teacks how long a combo hit remains active
+        // Resets the combo if time runs out
+        HandleComboTimer(); 
+        
+        // Monitor's enemy position
+        // If the enemy falls of plane, trigger enemy falling sound, win logic, and respawn
+        CheckEnemyFalling();
     }
 
-    private void HandleMovement()
+   private void HandleMovement()
+   {
+    // Get horizontal input (left/right arrow keys or A/D keys)
+    float horizontal = Input.GetAxis("Horizontal"); 
+
+    // Get vertical input (up/down arrow keys or W/S keys)
+    float vertical = Input.GetAxis("Vertical"); 
+
+    // Create a movement vector based on player input, only affecting X and Z axes (no vertical movement).
+    // Multiply the vector by the movement speed to control how fast the player moves.
+    Vector3 movement = new Vector3(horizontal, 0, vertical) * moveSpeed; 
+
+    // Apply the movement to the Rigidbody by setting its linear velocity.
+    // This preserves the current Y-axis (vertical) velocity so jumping/falling isn't interrupted.
+    rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z); 
+
+    // If the player's position has changed and no other audio is currently playing...
+    if (transform.position != lastPosition && !audioSource.isPlaying) 
     {
-        float horizontal = Input.GetAxis("Horizontal"); // Gets horizontal input (left/right arrow keys)
-        float vertical = Input.GetAxis("Vertical"); // Gets vertical input (up/down arrow keys)
-        Vector3 movement = new Vector3(horizontal, 0, vertical) * moveSpeed; // Creates 3D movement vector from players input and multiplies it by movement speed
-        rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z); // Apply movement to Rigidbody 
+        // Play the movement sound effect to indicate the player is moving.
+        audioSource.PlayOneShot(movementSound);
 
-        if (transform.position != lastPosition && !audioSource.isPlaying) // Plays the movement sound if position changes audio isn't playing
-        {
-            audioSource.PlayOneShot(movementSound);
-            lastPosition = transform.position;
-        }
+        // Update the last known position so this logic doesn't repeat unnecessarily.
+        lastPosition = transform.position;
     }
+}
+
 
     private void HandleJumping()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && jumpCount < 2) // Jump logic with limit of 2 jumps (a double jump)
-        {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z); // Reset vertical velocity before each jump 
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    // Check if the player presses the spacebar and hasn't yet reached the jump limit (double jump).
+    if (Input.GetKeyDown(KeyCode.Space) && jumpCount < 2) 
+    {
+        // Reset the player's vertical velocity (Y-axis) before applying a new jump force.
+        // This ensures that any residual upward or downward velocity is cleared before jumping.
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z); 
 
-            if (jumpCount == 0)
-                audioSource.PlayOneShot(jumpingSound1); // Play sound for one jump
-            else if (jumpCount == 1)
-                audioSource.PlayOneShot(jumpingSound2); // Play sound for second jump (Double jump)
+        // Apply an upward force to the player's Rigidbody to make them jump.
+        // The force is based on the specified jump force and is applied as an impulse.
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
 
-            jumpCount++; //Increase jump count
-        }
+        // Check if it's the first jump (jumpCount == 0), and play the corresponding jump sound.
+        if (jumpCount == 0)
+            audioSource.PlayOneShot(jumpingSound1); // Play sound for first jump
+
+        // If it's the second jump (jumpCount == 1), play a different sound for the double jump.
+        else if (jumpCount == 1)
+            audioSource.PlayOneShot(jumpingSound2); // Play sound for second jump (Double jump)
+
+        // Increment the jump count to track how many jumps the player has performed.
+        jumpCount++; // Increase jump count after a jump
     }
+}
+
 
     private void HandleFalling()
     {
-        if (transform.position.y < fallingThreshold) // Plays falling sound if player falls down from plane
-        {
-            audioSource.PlayOneShot(fallingSound);
-        }
-
-        if (transform.position.y < fallingThreshold && !isGameOver) // Once this happens its game over, game over sound will play
-        {
-            GameOver();
-        }
-    }
-
-    private void HandleComboTimer()
+    // Check if the player's Y-position is lower than the defined falling threshold.
+    // If the player falls below the threshold (e.g., falls off the platform), play the falling sound.
+    if (transform.position.y < fallingThreshold) 
     {
-        if (comboCounter > 0) // Counts combo hits and will reduce timer
-        {
-            comboTimer -= Time.deltaTime; 
-            if (comboTimer <= 0f)
-            {
-                comboCounter = 0; // Reset combo if time runs out
-            }
-        }
+        audioSource.PlayOneShot(fallingSound); // Play falling sound effect
     }
 
-    private void CheckEnemyFalling()
-    {    
-        // Checks if enemy has fallen, will play sound once
-        if (enemyCube != null && !enemyFallingSoundCheck && enemyCube.transform.position.y < enemyFallThreshold)
+    // Check again if the player's Y-position is below the threshold and also ensure the game is not over.
+    // If the player falls below the threshold and the game is still ongoing, trigger the game over logic.
+    if (transform.position.y < fallingThreshold && !isGameOver) 
+    {
+        GameOver(); // Call the GameOver() method to end the game
+    }
+}
+
+
+   private void HandleComboTimer()
+   {
+    // Check if there have been any combo hits (comboCounter > 0)
+    if (comboCounter > 0) 
+    {
+        // Decrease the combo timer by the amount of time passed since the last frame.
+        // Time.deltaTime represents the time in seconds between frames.
+        comboTimer -= Time.deltaTime; 
+
+        // If the timer runs out (it reaches 0 or below), reset the combo.
+        if (comboTimer <= 0f)
         {
-            audioSource.PlayOneShot(enemyFallingSound); // Play enemy falling sound 
-            Invoke("aWin", enemyFallingSound.length); // Play win sound after fall 
-            enemyFallingSoundCheck = true;
-            Invoke("summonEnemy", enemyFallingSound.length + 0.5f); // Respawn ememy 
+            comboCounter = 0; // Reset the combo count if the time window has expired
         }
     }
+}
 
-    private void summonEnemy()
+
+   private void CheckEnemyFalling()
+   {    
+    // Check if the enemy object exists (enemyCube is not null),
+    // and ensure the falling sound hasn't been played yet (enemyFallingSoundCheck is false),
+    // and check if the enemy's Y position is below the fall threshold (enemyFallThreshold).
+    if (enemyCube != null && !enemyFallingSoundCheck && enemyCube.transform.position.y < enemyFallThreshold)
     {
-        // Reset enemy position and velocity
-        enemyCube.transform.position = enemyPosition;
-        enemyCube.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
-        audioSource.PlayOneShot(summonSound); // Play summon (Respawn) sound
-        enemyFallingSoundCheck = false; // Reset sound check flag
+        // Play the sound effect for when the enemy falls off the platform.
+        audioSource.PlayOneShot(enemyFallingSound); 
+
+        // Use Invoke to call the aWin() method after the length of the falling sound finishes,
+        // signaling that the player has won after the enemy falls.
+        Invoke("aWin", enemyFallingSound.length); 
+
+        // Set the enemyFallingSoundCheck flag to true to prevent the sound from playing again.
+        enemyFallingSoundCheck = true;
+
+        // Use Invoke to call the summonEnemy() method after the enemy falling sound ends,
+        // plus an additional 0.5 seconds delay to allow for sound completion before respawning.
+        Invoke("summonEnemy", enemyFallingSound.length + 0.5f); 
+    }
+}
+
+
+  private void summonEnemy()
+  {
+    // Reset the enemy's position to its initial position stored in enemyPosition.
+    // This brings the enemy back to its starting location after falling off the platform.
+    enemyCube.transform.position = enemyPosition;
+
+    // Reset the enemy's Rigidbody velocity to zero to stop any ongoing movement.
+    // This ensures the enemy doesn't continue moving when it respawns.
+    enemyCube.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+
+    // Play the sound effect for respawning the enemy (summon sound).
+    audioSource.PlayOneShot(summonSound); 
+
+    // Reset the flag that tracks whether the enemy falling sound has been played.
+    // This allows the falling sound to be triggered again if the enemy falls in the future.
+    enemyFallingSoundCheck = false; 
+}
+
+
+  private void GameOver()
+  {
+    // Set the game over flag to true, indicating that the game is over.
+    isGameOver = true; 
+
+    // Play the game over sound to signal the end of the game.
+    audioSource.PlayOneShot(gameOverSound); 
+
+    // Stop the player's movement by setting the Rigidbody's velocity to zero.
+    // This ensures the player doesn't continue moving after the game ends.
+    rb.linearVelocity = Vector3.zero; 
+
+    // Set the Rigidbody's isKinematic property to true, which disables physics interactions with the player.
+    // This prevents the player from being affected by gravity or collisions once the game is over.
+    rb.isKinematic = true; 
+
+    // Use Invoke to call the GameOversound() method after a 2.5-second delay, triggering scene reload.
+    Invoke("GameOversound", 2.5f);
+
+    // Use Invoke to call the summonSoundForObject() method after a 2.5-second delay.
+    // This plays the summon sound as part of the game over process.
+    Invoke("summonSoundForObject", 2.5f); 
+}
+
+
+   private void GameOversound()
+   {
+    // Reload the current scene to restart the game.
+    // This effectively resets the game state by loading the same scene again.
+    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    private void GameOver()
-    {
-        isGameOver = true; // Set game over flag
-        audioSource.PlayOneShot(gameOverSound); // Play game over sound
-        rb.linearVelocity = Vector3.zero; // Stop player movement 
-        rb.isKinematic = true; // Prevent physics from affecting player
-        
-        Invoke("GameOversound", 2.5f);
-        Invoke("summonSoundForObject", 2.5f); // Play summon sound as a part of game over
+
+   private void summonSoundForObject()
+   {
+    // Play the summon sound (this sound is for the player when they respawn).
+    // It uses the AudioSource component to play the sound once.
+    audioSource.PlayOneShot(summonSound);
     }
 
-    private void GameOversound()
-    {
-        // Reload current scene to restart game
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    private void summonSoundForObject()
-    {
-        // Suumon sound plays (For player)
-        audioSource.PlayOneShot(summonSound);
-    }
 
     public void aWin()
     {
-        // Play a win sound when enemy falls from plane
-        audioSource.PlayOneShot(winSound);
+    // Play the win sound when the enemy falls from the plane.
+    // This sound is used to indicate the player has won.
+    audioSource.PlayOneShot(winSound);
     }
+
 
     private void OnCollisionEnter(Collision collision)
     {
-        // Play collisison sound
-        if (collisionSound != null)
-        {
-            audioSource.PlayOneShot(collisionSound);
-        }
-
-        // Reset jump count and play a landing sound 
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            jumpCount = 0;
-            audioSource.PlayOneShot(landingSound);
-        }
-
-        // Register combo hits with enemies or targets 
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("ComboTarget"))
-        {
-            ComboHit();
-        }
-    }
-    private void ComboHit()
+    // Play collision sound if a collision occurs and collisionSound is not null.
+    // This ensures that whenever the player collides with something, a sound is played.
+    if (collisionSound != null)
     {
-        comboCounter++; // Increase combo count
-        comboTimer = comboReset; // Reset combo timer 
-
-        if (comboCounter >= 2)
-        {
-            audioSource.PlayOneShot(comboSound); // Play the combo sound when combo is high enough (After 2 consecutive hits)
-        }
+        audioSource.PlayOneShot(collisionSound);
     }
+
+    // Reset jump count and play a landing sound when the player lands on the ground.
+    // This condition checks if the player has collided with an object tagged as "Ground".
+    if (collision.gameObject.CompareTag("Ground"))
+    {
+        jumpCount = 0; // Reset the jump count to allow jumping again.
+        audioSource.PlayOneShot(landingSound); // Play a sound to indicate the player has landed.
+    }
+
+    // Register combo hits when the player collides with objects tagged as "Enemy" or "ComboTarget".
+    // This checks for collision with enemy objects or combo targets to track combo hits.
+    if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("ComboTarget"))
+    {
+        ComboHit(); // Call ComboHit to track consecutive hits for combos.
+    }
+}
+
+    private void ComboHit()
+    {   
+    // Increase the combo counter by 1 to track consecutive hits.
+    // Each time a valid combo hit occurs (e.g., hitting an enemy), the combo counter increases.
+    comboCounter++;
+
+    // Reset the combo timer to the specified duration (comboReset).
+    // This ensures that the combo timer is restarted every time a hit occurs within the combo window.
+    comboTimer = comboReset;
+
+    // If the combo counter reaches or exceeds 2, it means the player has performed a combo.
+    // Play the combo sound to notify the player that they have achieved a combo.
+    if (comboCounter >= 2)
+    {
+        audioSource.PlayOneShot(comboSound); // Play the combo sound when two or more hits are made in quick succession.
+    }
+  }
+
 }
 
 
