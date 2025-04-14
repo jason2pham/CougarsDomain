@@ -73,7 +73,7 @@ public class MusicSound : MonoBehaviour // The base class of unity, allowing the
     {
         float horizontal = Input.GetAxis("Horizontal"); // Gets horizontal input (left/right arrow keys)
         float vertical = Input.GetAxis("Vertical"); // Gets vertical input (up/down arrow keys)
-        Vector3 movement = new Vector3(horizontal, 0, vertical) * moveSpeed; // Calculates movement vector for horizontal and vertical input, uses moveSpeed to control speed
+        Vector3 movement = new Vector3(horizontal, 0, vertical) * moveSpeed; // Creates 3D movement vector from players input and multiplies it by movement speed
         rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z); // Apply movement to Rigidbody 
 
         if (transform.position != lastPosition && !audioSource.isPlaying) // Plays the movement sound if position changes audio isn't playing
