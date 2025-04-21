@@ -14,15 +14,18 @@ public class GachaAnimator : MonoBehaviour
     public Sprite rareSprite;
     public Sprite epicSprite;
 
-    // Reference to the SummonPool from GachaSystem.cs
+    public Transform modelSpawnPoint;
+    private GameObject currentModelInstance;
+
     public SummonPool summonPool;
+
+    public GameObject flameSwordPrefab;
+    public GameObject windBowPrefab;
 
     private void Start()
     {
-        // Ensure summonButton triggers StartSummonAnimation
         summonButton.onClick.AddListener(StartSummonAnimation);
 
-        // Initialize the summon pool
         if (summonPool == null)
         {
             summonPool = new SummonPool();
@@ -32,17 +35,21 @@ public class GachaAnimator : MonoBehaviour
 
     private void InitializeSummonPool()
     {
-        // Create some example summonable items
         var swordStats = new Dictionary<string, int> { { "Strength", 10 } };
-        Weapon sword = new Weapon("Flame Sword", "Epic", swordStats, 30, "Fire");
+        var sword = new Weapon("Flame Sword", "Epic", swordStats, 30, "Fire")
+        {
+            ModelPrefab = flameSwordPrefab
+        };
 
         var bowStats = new Dictionary<string, int> { { "Strength", 8 } };
-        Weapon bow = new Weapon("Wind Bow", "Rare", bowStats, 20, "Wind");
+        var bow = new Weapon("Wind Bow", "Rare", bowStats, 20, "Wind")
+        {
+            ModelPrefab = windBowPrefab
+        };
 
         summonPool.AddSummonableItem(sword);
         summonPool.AddSummonableItem(bow);
 
-        // Set rarity weights
         summonPool.SetRarityWeight("Common", 50f);
         summonPool.SetRarityWeight("Rare", 30f);
         summonPool.SetRarityWeight("Epic", 15f);
@@ -56,20 +63,14 @@ public class GachaAnimator : MonoBehaviour
 
     IEnumerator PlaySummon()
     {
-        // Show panel
         summonPanel.SetActive(true);
         resultText.text = "Summoning...";
 
-        // Simulate summon animation delay
         yield return new WaitForSeconds(2f);
 
-        // Pull the item
         SummonableItem item = summonPool.GenerateReward();
-
-        // Show result
         resultText.text = $"You summoned: {item.Name} ({item.Rarity})";
 
-        // Show rarity-based image
         switch (item.Rarity)
         {
             case "Common":
@@ -86,10 +87,18 @@ public class GachaAnimator : MonoBehaviour
                 break;
         }
 
-        // Show result for a while
+        if (currentModelInstance != null)
+        {
+            Destroy(currentModelInstance);
+        }
+
+        if (item.ModelPrefab != null)
+        {
+            currentModelInstance = Instantiate(item.ModelPrefab, modelSpawnPoint.position, Quaternion.identity, modelSpawnPoint);
+        }
+
         yield return new WaitForSeconds(3f);
 
-        // Hide panel and re-enable button
         summonPanel.SetActive(false);
         summonButton.interactable = true;
     }
